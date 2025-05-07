@@ -2,13 +2,40 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Egy egyszerűsített, 5x5-ös táblán játszható sakkjáték.
+ * A játékban a felhasználó ('l', 'f', 'k' bábukkal) játszik egy egyszerű AI ellen ('L', 'F', 'K' bábukkal).
+ * A bábuk mozgása korlátozott a kis tábla mérete miatt.
+ * A játékos a konzolon keresztül adhatja meg a lépéseit, pl. "E5 E4".
+ * Az AI egy egyszerű minimax algoritmussal választja a lépéseit.
+ */
 public class SakkJatek {
+    /**
+     * A tábla mérete (5x5).
+     */
     static final int MERET = 5;
+    /**
+     * Üres mezőt jelző karakter.
+     */
     static final char URES = '.';
+    /**
+     * A játékos bábuit jelző karakterek.
+     */
     static final char[] JATEKOS_BABUK = {'l', 'f', 'k'};
+    /**
+     * Az AI bábuit jelző karakterek.
+     */
     static final char[] AI_BABUK = {'L', 'F', 'K'};
+    /**
+     * A játéktábla kétdimenziós karaktertömbként.
+     */
     static char[][] tabla = new char[MERET][MERET];
 
+    /**
+     * A játék fő metódusa. Inicializálja a táblát, kiírja a kezdeti állapotot,
+     * fogadja a játékos lépéseit, lépteti az AI-t, és ellenőrzi a játék végét.
+     * @param args Parancssori argumentumok (nem használt).
+     */
     public static void main(String[] args) {
         tablaInicializalas();
         tablaKiiras();
@@ -58,6 +85,10 @@ public class SakkJatek {
         scanner.close();
     }
 
+    /**
+     * Inicializálja a játéktáblát a kezdőállapotba.
+     * Az AI bábui a felső sorban, a játékos bábui az alsó sorban helyezkednek el.
+     */
     private static void tablaInicializalas() {
         for (int i = 0; i < MERET; i++) {
             for (int j = 0; j < MERET; j++) {
@@ -80,6 +111,10 @@ public class SakkJatek {
         tabla[4][4] = 'l';
     }
 
+    /**
+     * Kiírja a játéktábla aktuális állapotát a konzolra.
+     * A tábla sorai számozva, oszlopai betűzve vannak.
+     */
     private static void tablaKiiras() {
         System.out.println("  A B C D E");
         System.out.println("  +---+---+---+---+---+");
@@ -93,6 +128,15 @@ public class SakkJatek {
         }
     }
 
+    /**
+     * Ellenőrzi, hogy a megadott lépés érvényes-e a kiválasztott játékos szempontjából.
+     * A lépés formátumának "KezdőPozíció CélPozíció" kell lennie (pl. "E5 E4").
+     * A metódus ellenőrzi a formátumot, a kezdő pozíción lévő bábut,
+     * és hogy a cél pozícióra a bábu szabályosan léphet-e.
+     * @param lepes A játékos által megadott lépés.
+     * @param babuk A lépést végrehajtó játékos bábukészlete.
+     * @return True, ha a lépés érvényes, egyébként false.
+     */
     private static boolean ervenyesLepes(String lepes, char[] babuk) {
         if (lepes.length() != 5) return false;
 
@@ -133,6 +177,10 @@ public class SakkJatek {
         return false; // A lépés nem érvényes a bábu szabályai szerint
     }
 
+    /**
+     * Végrehajtja a játékos lépését a táblán.
+     * @param lepes A játékos által megadott érvényes lépés.
+     */
     private static void jatekosHuzas(String lepes) {
         String[] reszek = lepes.split(" ");
         int[] kezdo = pozicioAtvaltas(reszek[0]);
@@ -143,6 +191,10 @@ public class SakkJatek {
         tabla[cel[0]][cel[1]] = babu;
     }
 
+    /**
+     * Végrehajtja az AI lépését a táblán.
+     * @param lepes Az AI által választott érvényes lépés.
+     */
     private static void aiHuzas(String lepes) {
         String[] reszek = lepes.split(" ");
         int[] kezdo = pozicioAtvaltas(reszek[0]);
@@ -153,6 +205,11 @@ public class SakkJatek {
         tabla[cel[0]][cel[1]] = babu;
     }
 
+    /**
+     * Átvált egy sakk pozíciót (pl. "A1") egy tábla koordinátára (pl. [4, 0]).
+     * @param pozicio A sakk pozíció string formátumban.
+     * @return Egy kételemű int tömb a tábla koordinátáival [sor, oszlop], vagy null, ha érvénytelen a pozíció.
+     */
     private static int[] pozicioAtvaltas(String pozicio) {
         if (pozicio.length() != 2) return null;
 
@@ -167,6 +224,10 @@ public class SakkJatek {
         return new int[]{x, y};
     }
 
+    /**
+     * Lekéri az AI által választott lépést a minimax algoritmus segítségével.
+     * @return Az AI által választott lépés string formátumban, vagy null, ha a játéknak vége.
+     */
     private static String getAiLepes() {
         int legjobbErtek = Integer.MIN_VALUE;
         String legjobbLepes = null;
@@ -185,6 +246,15 @@ public class SakkJatek {
         return legjobbLepes;
     }
 
+    /**
+     * A minimax algoritmus rekurzív implementációja a legjobb lépés megtalálásához.
+     * @param aktualisTabla A tábla aktuális állapota.
+     * @param melyseg A keresés mélysége.
+     * @param alfa Alfa-béta vágáshoz használt alfa érték.
+     * @param beta Alfa-béta vágáshoz használt béta érték.
+     * @param gepLep True, ha az AI lép, false, ha a játékos lép.
+     * @return A táblaállapot értéke az AI szempontjából.
+     */
     private static int minimax(char[][] aktualisTabla, int melyseg, int alfa, int beta, boolean gepLep) {
         if (melyseg == 0 || vegeVan(aktualisTabla)) {
             return ertekel(aktualisTabla);
@@ -219,10 +289,21 @@ public class SakkJatek {
         }
     }
 
+    /**
+     * Lekéri az összes lehetséges lépést egy adott játékos számára az aktuális táblaállapotban.
+     * @param babuk A lépni kívánó játékos bábukészlete.
+     * @return Egy lista a lehetséges lépésekkel string formátumban.
+     */
     private static List<String> osszesLehetosegesLepes(char[] babuk) {
         return osszesLehetosegesLepes(babuk, tabla);
     }
 
+    /**
+     * Lekéri az összes lehetséges lépést egy adott játékos számára egy adott táblaállapotban.
+     * @param babuk A lépni kívánó játékos bábukészlete.
+     * @param aktualisTabla A tábla aktuális állapota.
+     * @return Egy lista a lehetséges lépésekkel string formátumban.
+     */
     private static List<String> osszesLehetosegesLepes(char[] babuk, char[][] aktualisTabla) {
         List<String> lepesek = new ArrayList<>();
         for (int i = 0; i < MERET; i++) {
@@ -246,6 +327,15 @@ public class SakkJatek {
         return lepesek;
     }
 
+    /**
+     * Lekéri egy adott bábu összes lehetséges lépését egy adott pozícióról az aktuális táblaállapotban.
+     * Figyelembe veszi a bábu típusát és a tábla határait.
+     * @param sor A bábu sorának indexe.
+     * @param oszlop A bábu oszlopának indexe.
+     * @param babu A bábut jelző karakter.
+     * @param aktualisTabla A tábla aktuális állapota.
+     * @return Egy lista a lehetséges célpozíciók koordinátáival.
+     */
     private static List<int[]> getLehetsegesLepesek(int sor, int oszlop, char babu, char[][] aktualisTabla) {
         List<int[]> lepesek = new ArrayList<>();
         int[][] atlosIranyok = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
@@ -294,16 +384,32 @@ public class SakkJatek {
         return lepesek;
     }
 
+    /**
+     * Ellenőrzi, hogy a megadott sor és oszlop indexek a táblán belül vannak-e.
+     * @param sor A vizsgált sor indexe.
+     * @param oszlop A vizsgált oszlop indexe.
+     * @return True, ha a pozíció érvényes, egyébként false.
+     */
     private static boolean ervenyesPozicio(int sor, int oszlop) {
         return sor >= 0 && sor < MERET && oszlop >= 0 && oszlop < MERET;
     }
 
+    /**
+     * Átvált egy tábla koordinátát (pl. [4, 0]) egy sakk pozícióra (pl. "A1").
+     * @param pozicio A tábla koordinátái egy kételemű int tömbben [sor, oszlop].
+     * @return A sakk pozíció string formátumban.
+     */
     private static String pozicioString(int[] pozicio) {
         return (char) ('A' + pozicio[1]) + "" + (pozicio[0] + 1);
     }
 
+    /**
+     * Kiértékeli a tábla aktuális állapotát az AI szempontjából.
+     * Egy egyszerű heurisztika: az AI bábuk számának és a játékos bábuk számának különbsége.
+     * @param aktualisTabla A tábla aktuális állapota.
+     * @return A tábla értéke. Pozitív érték az AI számára előnyös, negatív a játékos számára.
+     */
     private static int ertekel(char[][] aktualisTabla) {
-        // Egyszerű értékelő függvény: a saját bábuk száma mínusz az ellenfél bábuk száma
         int aiPontszam = 0;
         int jatekosPontszam = 0;
         for (int i = 0; i < MERET; i++) {
@@ -323,14 +429,30 @@ public class SakkJatek {
         return aiPontszam - jatekosPontszam;
     }
 
+    /**
+     * Ellenőrzi, hogy a játéknak vége van-e (az egyik játékos elvesztette az összes bábuját).
+     * @param aktualisTabla A tábla aktuális állapota.
+     * @return True, ha a játéknak vége, egyébként false.
+     */
     private static boolean vegeVan(char[][] aktualisTabla) {
         return vesztett(AI_BABUK, aktualisTabla) || vesztett(JATEKOS_BABUK, aktualisTabla);
     }
 
+    /**
+     * Ellenőrzi, hogy egy adott játékos elvesztette-e az összes bábuját az aktuális táblán.
+     * @param babuk A vizsgált játékos bábukészlete.
+     * @return True, ha a játékos elvesztette az összes bábuját, egyébként false.
+     */
     private static boolean vesztett(char[] babuk) {
         return vesztett(babuk, tabla);
     }
 
+    /**
+     * Ellenőrzi, hogy egy adott játékos elvesztette-e az összes bábuját egy adott táblaállapotban.
+     * @param babuk A vizsgált játékos bábukészlete.
+     * @param aktualisTabla A tábla aktuális állapota.
+     * @return True, ha a játékos elvesztette az összes bábuját, egyébként false.
+     */
     private static boolean vesztett(char[] babuk, char[][] aktualisTabla) {
         for (int i = 0; i < MERET; i++) {
             for (int j = 0; j < MERET; j++) {
@@ -344,10 +466,19 @@ public class SakkJatek {
         return true; // Nincs több bábu
     }
 
+    /**
+     * Létrehozza a játéktábla egy másolatát.
+     * @return A tábla másolata.
+     */
     private static char[][] tablaMasolas() {
         return tablaMasolas(tabla);
     }
 
+    /**
+     * Létrehozza egy adott táblaállapot másolatát.
+     * @param eredeti A másolandó tábla.
+     * @return A tábla másolata.
+     */
     private static char[][] tablaMasolas(char[][] eredeti) {
         char[][] masolat = new char[MERET][MERET];
         for (int i = 0; i < MERET; i++) {
@@ -356,6 +487,12 @@ public class SakkJatek {
         return masolat;
     }
 
+    /**
+     * Végrehajt egy lépést egy adott táblán.
+     * @param lepes A végrehajtandó lépés string formátumban.
+     * @param babuk A lépést végrehajtó játékos bábukészlete.
+     * @param aktualisTabla A tábla, amelyen a lépést végre kell hajtani.
+     */
     private static void huzas(String lepes, char[] babuk, char[][] aktualisTabla) {
         String[] reszek = lepes.split(" ");
         int[] kezdo = pozicioAtvaltas(reszek[0]);
