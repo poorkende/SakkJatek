@@ -487,12 +487,7 @@ public class SakkJatek {
         return masolat;
     }
 
-    /**
-     * Végrehajt egy lépést egy adott táblán.
-     * @param lepes A végrehajtandó lépés string formátumban.
-     * @param babuk A lépést végrehajtó játékos bábukészlete.
-     * @param aktualisTabla A tábla, amelyen a lépést végre kell hajtani.
-     */
+    
     private static void huzas(String lepes, char[] babuk, char[][] aktualisTabla) {
         String[] reszek = lepes.split(" ");
         int[] kezdo = pozicioAtvaltas(reszek[0]);
